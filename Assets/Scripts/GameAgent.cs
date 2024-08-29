@@ -28,10 +28,6 @@ public class GameAgent : MonoBehaviour
     [SerializeField] private Vector2 _startPosition = new Vector2();
     private Vector2 endPosition;
     // Use this for initialization
-    
-    void Start()
-    {
-    }
 
     // Update is called once per frame
     void Update()
