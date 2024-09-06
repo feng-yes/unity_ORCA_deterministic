@@ -42,6 +42,8 @@ namespace RVO
     {
         /**
          * <summary>Defines a worker.</summary>
+         * 处理 agents_ 列表从start_到end_的元素
+         * 主要方法：step和update
          */
         private class Worker
         {
@@ -337,8 +339,10 @@ namespace RVO
          */
         public float doStep()
         {
+            // 删除代理
             updateDeleteAgent();
 
+            // 初始化工作线程
             if (workers_ == null)
             {
                 workers_ = new Worker[numWorkers_];
@@ -352,6 +356,7 @@ namespace RVO
                 }
             }
 
+            // agent数量变化时调整workers_的处理范围
             if (workerAgentCount_ != getNumAgents())
             {
                 workerAgentCount_ = getNumAgents();
@@ -921,7 +926,9 @@ namespace RVO
 
             if (numWorkers_ <= 0)
             {
+                // I/O 完成端口线程 数量
                 int completionPorts;
+                // 使用线程池推荐的最小工作线程数
                 ThreadPool.GetMinThreads(out numWorkers_, out completionPorts);
             }
             workers_ = null;
