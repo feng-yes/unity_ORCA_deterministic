@@ -45,6 +45,8 @@ namespace RVO
          */
         private struct AgentTreeNode
         {
+            // begin_, end_ 是 agents_ 数组的下标，表示这个节点包含的agent
+            // left_, right_ 是 左右子树的下标
             internal int begin_;
             internal int end_;
             internal int left_;
@@ -548,6 +550,7 @@ namespace RVO
          */
         private void queryAgentTreeRecursive(Agent agent, ref float rangeSq, int node)
         {
+            // 是否叶子节点
             if (agentTree_[node].end_ - agentTree_[node].begin_ <= MAX_LEAF_SIZE)
             {
                 for (int i = agentTree_[node].begin_; i < agentTree_[node].end_; ++i)
@@ -557,9 +560,15 @@ namespace RVO
             }
             else
             {
-                float distSqLeft = RVOMath.sqr(Math.Max(0.0f, agentTree_[agentTree_[node].left_].minX_ - agent.position_.x_)) + RVOMath.sqr(Math.Max(0.0f, agent.position_.x_ - agentTree_[agentTree_[node].left_].maxX_)) + RVOMath.sqr(Math.Max(0.0f, agentTree_[agentTree_[node].left_].minY_ - agent.position_.y_)) + RVOMath.sqr(Math.Max(0.0f, agent.position_.y_ - agentTree_[agentTree_[node].left_].maxY_));
+                // 计算 agent 到左子树在 x 和 y 方向上的最短距离平方
+                // 如果代理在子树外部，会得到一个正数；如果代理在子树内部，距离为 0。
+                float distSqLeft = RVOMath.sqr(Math.Max(0.0f, agentTree_[agentTree_[node].left_].minX_ - agent.position_.x_)) +
+                                   RVOMath.sqr(Math.Max(0.0f, agent.position_.x_ - agentTree_[agentTree_[node].left_].maxX_)) +
+                                   RVOMath.sqr(Math.Max(0.0f, agentTree_[agentTree_[node].left_].minY_ - agent.position_.y_)) +
+                                   RVOMath.sqr(Math.Max(0.0f, agent.position_.y_ - agentTree_[agentTree_[node].left_].maxY_));
                 float distSqRight = RVOMath.sqr(Math.Max(0.0f, agentTree_[agentTree_[node].right_].minX_ - agent.position_.x_)) + RVOMath.sqr(Math.Max(0.0f, agent.position_.x_ - agentTree_[agentTree_[node].right_].maxX_)) + RVOMath.sqr(Math.Max(0.0f, agentTree_[agentTree_[node].right_].minY_ - agent.position_.y_)) + RVOMath.sqr(Math.Max(0.0f, agent.position_.y_ - agentTree_[agentTree_[node].right_].maxY_));
 
+                // 子树到 agent 的距离是否在 rangeSq 之内，优先处理距离较近的子树
                 if (distSqLeft < distSqRight)
                 {
                     if (distSqLeft < rangeSq)
