@@ -280,15 +280,18 @@ namespace RVO
                 agentTree_[node].minY_ = Math.Min(agentTree_[node].minY_, agents_[i].position_.y_);
             }
 
+            // 当前节点中的代理数量超过 MAX_LEAF_SIZE，则需要进一步划分
             if (end - begin > MAX_LEAF_SIZE)
             {
                 /* No leaf node. */
+                // 选择较长的一维分割
                 bool isVertical = agentTree_[node].maxX_ - agentTree_[node].minX_ > agentTree_[node].maxY_ - agentTree_[node].minY_;
                 float splitValue = 0.5f * (isVertical ? agentTree_[node].maxX_ + agentTree_[node].minX_ : agentTree_[node].maxY_ + agentTree_[node].minY_);
 
                 int left = begin;
                 int right = end;
 
+                // 类似于快速排序中的“分区”，一左一右移动指针并交换不属于分区的元素的位置
                 while (left < right)
                 {
                     while (left < right && (isVertical ? agents_[left].position_.x_ : agents_[left].position_.y_) < splitValue)
@@ -322,6 +325,7 @@ namespace RVO
                 }
 
                 agentTree_[node].left_ = node + 1;
+                // 需要跳过所有属于 left_ 子树的节点
                 agentTree_[node].right_ = node + 2 * leftSize;
 
                 buildAgentTreeRecursive(begin, left, agentTree_[node].left_);

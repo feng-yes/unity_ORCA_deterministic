@@ -39,6 +39,9 @@ namespace RVO
      */
     internal class Agent
     {
+        /**
+         * KeyValuePair 的 k 是跟 邻居Agent 的 距离平方
+         */
         internal IList<KeyValuePair<float, Agent>> agentNeighbors_ = new List<KeyValuePair<float, Agent>>();
         internal IList<KeyValuePair<float, Obstacle>> obstacleNeighbors_ = new List<KeyValuePair<float, Obstacle>>();
         internal IList<Line> orcaLines_ = new List<Line>();
@@ -46,11 +49,15 @@ namespace RVO
         internal Vector2 prefVelocity_;
         internal Vector2 velocity_;
         internal int id_ = 0;
+        // 在导航中考虑的其他代理的最大数量
         internal int maxNeighbors_ = 0;
         internal float maxSpeed_ = 0.0f;
+        // 在导航中考虑的与其他代理的最大距离（中心点到中心点）
         internal float neighborDist_ = 0.0f;
         internal float radius_ = 0.0f;
+        // 模拟计算出的此代理相对于其他代理的速度安全的最短时间。此数字越大，此代理对其他代理的出现做出反应的速度越快，但此代理在选择速度时拥有的自由度就越小。
         internal float timeHorizon_ = 0.0f;
+        // 模拟计算出的此代理的速度相对于障碍物而言是安全的最短时间。
         internal float timeHorizonObst_ = 0.0f;
         internal bool needDelete_ = false;
 
@@ -442,6 +449,7 @@ namespace RVO
 
                     int i = agentNeighbors_.Count - 1;
 
+                    // 新插入的邻居按照距离排序。
                     while (i != 0 && distSq < agentNeighbors_[i - 1].Key)
                     {
                         agentNeighbors_[i] = agentNeighbors_[i - 1];
@@ -450,6 +458,7 @@ namespace RVO
 
                     agentNeighbors_[i] = new KeyValuePair<float, Agent>(distSq, agent);
 
+                    // 已达到最大大小，更新 rangeSq ，使得算法每次只保留最近的邻居。
                     if (agentNeighbors_.Count == maxNeighbors_)
                     {
                         rangeSq = agentNeighbors_[agentNeighbors_.Count - 1].Key;

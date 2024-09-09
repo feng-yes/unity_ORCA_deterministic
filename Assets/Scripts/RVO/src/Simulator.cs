@@ -113,9 +113,15 @@ namespace RVO
         private static Simulator instance_ = new Simulator();
 
         private Agent defaultAgent_;
+        /**
+         * ManualResetEvent 多线程同步
+         * Reset() 将事件的状态设置为未触发。等待它的线程会被阻塞，直到事件再次被触发。
+         * 当工作线程完成其分配的任务时，通常应该使用 Set() 触发事件，将其状态转换为已触发状态
+         * 一旦被触发（signaled），它会保持触发状态，直到被手动重置。
+         */
         private ManualResetEvent[] doneEvents_;
         private Worker[] workers_;
-        private int numWorkers_;
+        private int numWorkers_;  // 工作线程数，值是 ThreadPool.GetMinThreads
         private int workerAgentCount_;
         private float globalTime_;
 
@@ -342,7 +348,7 @@ namespace RVO
             // 删除代理
             updateDeleteAgent();
 
-            // 初始化工作线程
+            // 初始化工作线程 Worker
             if (workers_ == null)
             {
                 workers_ = new Worker[numWorkers_];
@@ -352,6 +358,7 @@ namespace RVO
                 for (int block = 0; block < workers_.Length; ++block)
                 {
                     doneEvents_[block] = new ManualResetEvent(false);
+                    // 根据工作线程的数量划分处理的 agents_ 
                     workers_[block] = new Worker(block * getNumAgents() / workers_.Length, (block + 1) * getNumAgents() / workers_.Length, doneEvents_[block]);
                 }
             }
@@ -374,6 +381,7 @@ namespace RVO
                 ThreadPool.QueueUserWorkItem(workers_[block].step);
             }
 
+            // 阻塞，直到 doneEvents_ 中的所有事件都被触发
             WaitHandle.WaitAll(doneEvents_);
 
             for (int block = 0; block < workers_.Length; ++block)
