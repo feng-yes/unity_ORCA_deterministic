@@ -40,6 +40,7 @@ namespace RVO
     internal class Agent
     {
         /**
+         * 在 computeNeighbors 步骤构建
          * KeyValuePair 的 k 是跟 邻居Agent 的 距离平方
          */
         internal IList<KeyValuePair<float, Agent>> agentNeighbors_ = new List<KeyValuePair<float, Agent>>();
@@ -364,6 +365,7 @@ namespace RVO
 
                 if (distSq > combinedRadiusSq)
                 {
+                    // 没接触
                     /* No collision. */
                     Vector2 w = relativeVelocity - invTimeHorizon * relativePosition;
 
