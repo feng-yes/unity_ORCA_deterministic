@@ -47,14 +47,17 @@ namespace RVO
         internal IList<KeyValuePair<float, Obstacle>> obstacleNeighbors_ = new List<KeyValuePair<float, Obstacle>>();
         internal IList<Line> orcaLines_ = new List<Line>();
         internal Vector2 position_;
+        // 期望速度，是算法的优化目标，即无碰撞约束下的目标运动方向
         internal Vector2 prefVelocity_;
+        // 实际速度，计算时会以这个作为 agent 的速度
         internal Vector2 velocity_;
         internal int id_ = 0;
-        // 在导航中考虑的其他代理的最大数量
+        // 在导航中考虑的其他agent的最大数量
         internal int maxNeighbors_ = 0;
         internal float maxSpeed_ = 0.0f;
-        // 在导航中考虑的与其他代理的最大距离（中心点到中心点）
+        // 在导航中考虑的与其他agent的最大距离（中心点到中心点），超过就不考虑避让
         internal float neighborDist_ = 0.0f;
+        // 半径或社交距离，侵入这个距离内就算碰撞
         internal float radius_ = 0.0f;
         // 模拟计算出的此代理相对于其他代理的速度安全的最短时间。此数字越大，此代理对其他代理的出现做出反应的速度越快，但此代理在选择速度时拥有的自由度就越小。
         internal float timeHorizon_ = 0.0f;
@@ -62,6 +65,7 @@ namespace RVO
         internal float timeHorizonObst_ = 0.0f;
         internal bool needDelete_ = false;
 
+        // computeNewVelocity 计算出来的速度
         private Vector2 newVelocity_;
 
         /**
@@ -513,6 +517,8 @@ namespace RVO
          * subject to linear constraints defined by lines and a circular
          * constraint.</summary>
          *
+         * 线性规划中求解沿着指定线段的最优速度，受限于线性约束（由多条直线定义）和圆形约束
+         *
          * <returns>True if successful.</returns>
          *
          * <param name="lines">Lines defining the linear constraints.</param>
@@ -531,11 +537,13 @@ namespace RVO
 
             if (discriminant < 0.0f)
             {
+                // 当前线性约束与圆形约束没有交点
                 /* Max speed circle fully invalidates line lineNo. */
                 return false;
             }
 
             float sqrtDiscriminant = RVOMath.sqrt(discriminant);
+            // 线性约束的最左和最右的两个交点
             float tLeft = -dotProduct - sqrtDiscriminant;
             float tRight = -dotProduct + sqrtDiscriminant;
 
@@ -648,12 +656,15 @@ namespace RVO
 
             for (int i = 0; i < lines.Count; ++i)
             {
+                // 行列式计算result是否在直线安全的一边
                 if (RVOMath.det(lines[i].direction, lines[i].point - result) > 0.0f)
                 {
                     /* Result does not satisfy constraint i. Compute new optimal result. */
                     Vector2 tempResult = result;
+                    // 违反约束,尝试找到新的解。
                     if (!linearProgram1(lines, i, radius, optVelocity, directionOpt, ref result))
                     {
+                        // 找不到解回退
                         result = tempResult;
 
                         return i;
@@ -667,6 +678,9 @@ namespace RVO
         /**
          * <summary>Solves a two-dimensional linear program subject to linear
          * constraints defined by lines and a circular constraint.</summary>
+         *
+         * 在linearProgram2失败时提供一个后备解决方案
+         * 通过创建一组原始约束的"投影",找到一个折中的解决方案。这个方法是启发式的
          *
          * <param name="lines">Lines defining the linear constraints.</param>
          * <param name="numObstLines">Count of obstacle lines.</param>
@@ -697,6 +711,7 @@ namespace RVO
 
                         float determinant = RVOMath.det(lines[i].direction, lines[j].direction);
 
+                        // 是否平行
                         if (RVOMath.fabs(determinant) <= RVOMath.RVO_EPSILON)
                         {
                             /* Line i and line j are parallel. */
@@ -708,15 +723,19 @@ namespace RVO
                             else
                             {
                                 /* Line i and line j point in opposite direction. */
+                                // 如果方向相反,取两线上的点的中点作为新线的点
                                 line.point = 0.5f * (lines[i].point + lines[j].point);
                             }
                         }
                         else
                         {
+                            // 计算两条线的交点,作为新投影线的点。
                             line.point = lines[i].point + (RVOMath.det(lines[j].direction, lines[i].point - lines[j].point) / determinant) * lines[i].direction;
                         }
 
+                        // 新方向实际上是原来两条线所形成的角的角平分线的垂直方向
                         line.direction = RVOMath.normalize(lines[j].direction - lines[i].direction);
+                        // 新半平面包含了原来两条线之间的某个区域，并且扩展了新的区域，使得 linearProgram2 有可行解
                         projLines.Add(line);
                     }
 
