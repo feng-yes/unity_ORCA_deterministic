@@ -6,7 +6,7 @@ using UnityEngine;
 using Random = System.Random;
 using Vector2 = RVO.Vector2;
 
-public class GameAgent : MonoBehaviour
+public class GameAgent2 : MonoBehaviour
 {
     [HideInInspector] public int sid = -1;
 

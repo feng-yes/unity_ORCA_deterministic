@@ -59,7 +59,7 @@ namespace RVO
         internal float neighborDist_ = 0.0f;
         // 半径或社交距离，侵入这个距离内就算碰撞
         internal float radius_ = 0.0f;
-        // 模拟计算出的此代理相对于其他代理的速度安全的最短时间。此数字越大，此代理对其他代理的出现做出反应的速度越快，但此代理在选择速度时拥有的自由度就越小。
+        // 模拟计算出的此代理相对于其他agent的速度安全的最短时间。此数字越大，此代理对其他代理的出现做出反应的速度越快，但此代理在选择速度时拥有的自由度就越小。
         internal float timeHorizon_ = 0.0f;
         // 模拟计算出的此代理的速度相对于障碍物而言是安全的最短时间。
         internal float timeHorizonObst_ = 0.0f;

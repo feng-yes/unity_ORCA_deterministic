@@ -396,6 +396,17 @@ namespace RVO
 
             return globalTime_;
         }
+        
+        public void doStepBefore()
+        {
+            updateDeleteAgent();
+            kdTree_.buildAgentTree();
+        }
+
+        public void agentDoStep()
+        {
+            
+        }
 
         /**
          * <summary>Returns the specified agent neighbor of the specified agent.
