@@ -319,7 +319,45 @@ namespace RVO
 
             return obstacleNo;
         }
+        
+        public int setBoundary(IList<Vector2> vertices)
+        {
+            if (vertices.Count < 3)
+            {
+                return -1; // 边界至少需要3个点
+            }
 
+            // 清除现有边界
+            obstacles_.Clear();
+
+            int boundaryId = 0;
+
+            for (int i = 0; i < vertices.Count; ++i)
+            {
+                Obstacle obstacle = new Obstacle();
+                obstacle.point_ = vertices[i];
+
+                if (i != 0)
+                {
+                    obstacle.previous_ = obstacles_[obstacles_.Count - 1];
+                    obstacle.previous_.next_ = obstacle;
+                }
+
+                if (i == vertices.Count - 1)
+                {
+                    obstacle.next_ = obstacles_[boundaryId];
+                    obstacle.next_.previous_ = obstacle;
+                }
+
+                obstacle.direction_ = RVOMath.normalize(vertices[(i == vertices.Count - 1 ? 0 : i + 1)] - vertices[i]);
+
+                obstacle.id_ = obstacles_.Count;
+                obstacles_.Add(obstacle);
+            }
+
+            return boundaryId;
+        }
+        
         /**
          * <summary>Clears the simulation.</summary>
          */
