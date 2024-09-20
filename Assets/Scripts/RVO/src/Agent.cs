@@ -348,7 +348,30 @@ namespace RVO
                 line.point = rightCutOff + radius_ * invTimeHorizonObst * new Vector2(-line.direction.y(), line.direction.x());
                 orcaLines_.Add(line);
             }
-
+            
+            // 将边界边转换为 ORCA 线
+            foreach (var edge in Simulator.Instance.boundaryEdges)
+            {
+                Line line = new Line();
+                Vector2 relativePosition = edge.point - position_;
+            
+                // 如果 agent 已经在边界外，则强制其向内移动
+                if (RVOMath.det(edge.direction, relativePosition) > 0)
+                {
+                    line.point = new Vector2(0, 0);
+                    line.direction = -edge.direction;
+                }
+                else
+                {
+                    // 否则，创建一个 ORCA 线来避免穿过边界
+                    Vector2 u = velocity_ - (edge.point + edge.direction * (relativePosition * edge.direction));
+                    line.point = velocity_ - u;
+                    line.direction = RVOMath.normalize(u);
+                }
+            
+                orcaLines_.Add(line);
+            }
+            
             int numObstLines = orcaLines_.Count;
 
             float invTimeHorizon = 1.0f / timeHorizon_;

@@ -109,6 +109,9 @@ namespace RVO
         internal IList<Obstacle> obstacles_;
         internal KdTree kdTree_;
         internal float timeStep_;
+        
+        internal List<Vector2> boundaryVertices;
+        internal List<Line> boundaryEdges = new List<Line>();
 
         private static Simulator instance_ = new Simulator();
 
@@ -302,6 +305,7 @@ namespace RVO
                     obstacle.next_.previous_ = obstacle;
                 }
 
+                // 当前顶点 -> 下一个顶点
                 obstacle.direction_ = RVOMath.normalize(vertices[(i == vertices.Count - 1 ? 0 : i + 1)] - vertices[i]);
 
                 if (vertices.Count == 2)
@@ -310,6 +314,7 @@ namespace RVO
                 }
                 else
                 {
+                    // 如果下一个顶点在从前一个顶点到当前顶点的直线的左边或共线，则认为是凸的
                     obstacle.convex_ = (RVOMath.leftOf(vertices[(i == 0 ? vertices.Count - 1 : i - 1)], vertices[i], vertices[(i == vertices.Count - 1 ? 0 : i + 1)]) >= 0.0f);
                 }
 
@@ -320,42 +325,27 @@ namespace RVO
             return obstacleNo;
         }
         
-        public int setBoundary(IList<Vector2> vertices)
+        public void setBoundary(IList<Vector2> vertices)
         {
             if (vertices.Count < 3)
             {
-                return -1; // 边界至少需要3个点
+                throw new ArgumentException("Boundary must have at least 3 vertices");
             }
 
-            // 清除现有边界
-            obstacles_.Clear();
+            boundaryVertices = new List<Vector2>(vertices);
+            boundaryEdges = new List<Line>();
 
-            int boundaryId = 0;
-
-            for (int i = 0; i < vertices.Count; ++i)
+            // 构建边界边
+            for (int i = 0; i < boundaryVertices.Count; i++)
             {
-                Obstacle obstacle = new Obstacle();
-                obstacle.point_ = vertices[i];
-
-                if (i != 0)
-                {
-                    obstacle.previous_ = obstacles_[obstacles_.Count - 1];
-                    obstacle.previous_.next_ = obstacle;
-                }
-
-                if (i == vertices.Count - 1)
-                {
-                    obstacle.next_ = obstacles_[boundaryId];
-                    obstacle.next_.previous_ = obstacle;
-                }
-
-                obstacle.direction_ = RVOMath.normalize(vertices[(i == vertices.Count - 1 ? 0 : i + 1)] - vertices[i]);
-
-                obstacle.id_ = obstacles_.Count;
-                obstacles_.Add(obstacle);
+                int nextIndex = (i + 1) % boundaryVertices.Count;
+                Vector2 edge = boundaryVertices[nextIndex] - boundaryVertices[i];
+                Vector2 normal = RVOMath.normalize(new Vector2(-edge.y(), edge.x()));
+                Line line = new Line();
+                line.point = boundaryVertices[i];
+                line.direction = normal;
+                boundaryEdges.Add(line);
             }
-
-            return boundaryId;
         }
         
         /**

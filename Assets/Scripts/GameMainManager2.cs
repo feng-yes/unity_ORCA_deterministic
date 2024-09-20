@@ -12,7 +12,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
     [HideInInspector] public Vector2 mousePosition;
 
     private Plane m_hPlane = new Plane(Vector3.up, Vector3.zero);
-    private Dictionary<int, GameAgent> m_agentMap = new Dictionary<int, GameAgent>();
+    private Dictionary<int, GameAgent2> m_agentMap = new Dictionary<int, GameAgent2>();
     private float timeSinceLastStep = 0f;
 
     // Use this for initialization
@@ -55,7 +55,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
         if (sid >= 0)
         {
             GameObject go = LeanPool.Spawn(agentPrefab, new Vector3(mousePosition.x(), 0, mousePosition.y()), Quaternion.identity);
-            GameAgent ga = go.GetComponent<GameAgent>();
+            GameAgent2 ga = go.GetComponent<GameAgent2>();
             Assert.IsNotNull(ga);
             ga.sid = sid;
             ga.StartPosition = new Vector2(mousePosition.x(), mousePosition.y());
