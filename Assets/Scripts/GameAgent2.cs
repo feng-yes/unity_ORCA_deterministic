@@ -48,13 +48,10 @@ public class GameAgent2 : MonoBehaviour
         }
         
         // 测试 : 跟随鼠标 / 经过中间到达
-        Vector2 goalVector = GameMainManager.Instance.mousePosition - Simulator.Instance.getAgentPosition(sid);
+        Vector2 goalVector = GameMainManager2.Instance.mousePosition - Simulator.Instance.getAgentPosition(sid);
         // Vector2 goalVector = endPosition - Simulator.Instance.getAgentPosition(sid);
         
-        if (RVOMath.absSq(goalVector) > 1.0f)
-        {
-            goalVector = RVOMath.normalize(goalVector);
-        }
+        goalVector = RVOMath.normalize(goalVector) * 100;
 
         Simulator.Instance.setAgentPrefVelocity(sid, goalVector);
 

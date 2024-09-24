@@ -353,7 +353,7 @@ namespace RVO
             foreach (var edge in Simulator.Instance.boundaryEdges)
             {
                 Line line = new Line();
-                Vector2 relativePosition = edge.point - position_;
+                Vector2 relativePosition = position_ - edge.point;
             
                 // 如果 agent 已经在边界外，则强制其向内移动
                 if (RVOMath.det(edge.direction, relativePosition) > 0)
@@ -364,9 +364,13 @@ namespace RVO
                 else
                 {
                     // 否则，创建一个 ORCA 线来避免穿过边界
-                    Vector2 u = velocity_ - (edge.point + edge.direction * (relativePosition * edge.direction));
-                    line.point = velocity_ - u;
-                    line.direction = RVOMath.normalize(u);
+                    float invTimeStep = 1.0f / Simulator.Instance.timeStep_;
+                    line.direction = -edge.direction;
+                    line.point = invTimeStep * (edge.point + line.direction * radius_);
+                    
+                    // Vector2 u = velocity_ - (edge.point + edge.direction * (-relativePosition * edge.direction));
+                    // line.point = velocity_ - u;
+                    // line.direction = RVOMath.normalize(u);
                 }
             
                 orcaLines_.Add(line);

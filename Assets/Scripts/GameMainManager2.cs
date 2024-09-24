@@ -18,8 +18,8 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
     // Use this for initialization
     void Start()
     {
-        Simulator.Instance.setTimeStep(0.25f);
-        Simulator.Instance.setAgentDefaults(15.0f, 10, 2.5f, 5.0f, 2.0f, 2.0f, new Vector2(0.0f, 0.0f));
+        Simulator.Instance.setTimeStep(0.02f);
+        Simulator.Instance.setAgentDefaults(15.0f, 10, 0.05f, 0.05f, 2.0f, 50.0f, new Vector2(0.0f, 0.0f));
 
         // add in awake
         Simulator.Instance.processObstacles();

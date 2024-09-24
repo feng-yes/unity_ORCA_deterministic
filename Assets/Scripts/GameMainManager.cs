@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Lean;
 using RVO;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class GameMainManager : SingletonBehaviour<GameMainManager>
     // Use this for initialization
     void Start()
     {
+        throw new Exception();
         Simulator.Instance.setTimeStep(0.25f);
         Simulator.Instance.setAgentDefaults(15.0f, 10, 5.0f, 5.0f, 2.0f, 2.0f, new Vector2(0.0f, 0.0f));
 
