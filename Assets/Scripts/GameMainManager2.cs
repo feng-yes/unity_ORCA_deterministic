@@ -15,6 +15,9 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
     private Dictionary<int, GameAgent2> m_agentMap = new Dictionary<int, GameAgent2>();
     private float timeSinceLastStep = 0f;
 
+    private float logicframe = 0.05f;
+    private float totalframe = 0f;
+
     // Use this for initialization
     void Start()
     {
@@ -61,6 +64,33 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
             ga.StartPosition = new Vector2(mousePosition.x(), mousePosition.y());
             m_agentMap.Add(sid, ga);
         }
+    }
+
+    private void UpdateLogicFrame()
+    {
+        totalframe = totalframe + logicframe;
+        Simulator.Instance.doStepBefore();
+
+        foreach (var vAgent in m_agentMap)
+        {
+            GameAgent2 agent = vAgent.Value;
+            // 移动
+            Vector2 aimPosition = agent.GetAimPosition();
+            Vector2 goalVector = aimPosition - agent.currentPosition;
+            goalVector = RVOMath.normalize(goalVector) * agent.speed;
+            Simulator.Instance.setAgentPrefVelocity(agent.sid, goalVector);
+            Simulator.Instance.computeAgentNeighbors(agent.sid);
+            Simulator.Instance.computeAgentNewVelocity(agent.sid);
+            
+            // 处理转身及速度
+
+            // 替代原有的 agent update
+            Simulator.Instance.setAgentVelocity(agent.sid, new Vector2());
+            Simulator.Instance.setAgentPosition(agent.sid, new Vector2());
+        }
+
+        // 可以不设
+        Simulator.Instance.setGlobalTime(totalframe);
     }
 
     // Update is called once per frame

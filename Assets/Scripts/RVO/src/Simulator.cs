@@ -431,11 +431,6 @@ namespace RVO
             kdTree_.buildAgentTree();
         }
 
-        public void agentDoStep()
-        {
-            
-        }
-
         /**
          * <summary>Returns the specified agent neighbor of the specified agent.
          * </summary>
@@ -950,6 +945,16 @@ namespace RVO
         public void setAgentVelocity(int agentNo, Vector2 velocity)
         {
             agents_[agentNo2indexDict_[agentNo]].velocity_ = velocity;
+        }
+        
+        public void computeAgentNeighbors(int agentNo)
+        {
+            agents_[agentNo2indexDict_[agentNo]].computeNeighbors();
+        }
+
+        public void computeAgentNewVelocity(int agentNo)
+        {
+            agents_[agentNo2indexDict_[agentNo]].computeNewVelocity();
         }
 
         /**

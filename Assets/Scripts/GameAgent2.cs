@@ -20,14 +20,18 @@ public class GameAgent2 : MonoBehaviour
         }
     }
 
-
-
-    /** Random number generator. */
-    private Random m_random = new Random();
-
-    [SerializeField] private Vector2 _startPosition = new Vector2();
+    private Vector2 _startPosition = new Vector2();
     private Vector2 endPosition;
-    // Use this for initialization
+
+    public Vector2 currentPosition;
+
+    public int speed = 100;
+
+    public Vector2 GetAimPosition()
+    {
+        return endPosition;
+        // return GameMainManager2.Instance.mousePosition;
+    }
 
     // Update is called once per frame
     void Update()
@@ -51,7 +55,7 @@ public class GameAgent2 : MonoBehaviour
         Vector2 goalVector = GameMainManager2.Instance.mousePosition - Simulator.Instance.getAgentPosition(sid);
         // Vector2 goalVector = endPosition - Simulator.Instance.getAgentPosition(sid);
         
-        goalVector = RVOMath.normalize(goalVector) * 100;
+        goalVector = RVOMath.normalize(goalVector) * speed;
 
         Simulator.Instance.setAgentPrefVelocity(sid, goalVector);
 
