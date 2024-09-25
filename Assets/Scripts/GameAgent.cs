@@ -47,10 +47,11 @@ public class GameAgent : MonoBehaviour
             return;
         }
 
-        // Vector2 goalVector = GameMainManager.Instance.mousePosition - Simulator.Instance.getAgentPosition(sid);
+        // 跟随鼠标
+        Vector2 goalVector = GameMainManager.Instance.mousePosition - Simulator.Instance.getAgentPosition(sid);
         
         // 测试经过中间到达
-        Vector2 goalVector = endPosition - Simulator.Instance.getAgentPosition(sid);
+        // Vector2 goalVector = endPosition - Simulator.Instance.getAgentPosition(sid);
         
         if (RVOMath.absSq(goalVector) > 1.0f)
         {

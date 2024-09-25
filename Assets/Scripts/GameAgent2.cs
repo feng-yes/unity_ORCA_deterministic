@@ -16,21 +16,46 @@ public class GameAgent2 : MonoBehaviour
         set
         {
             _startPosition = value;
-            endPosition = new Vector2(-_startPosition.x(), -_startPosition.y());
+            currentPosition = value;
+            endPosition = value;
+            reachEnd = true;
         }
     }
 
+    public const int faceAngleTurnPerFrame = 10;
+    public const int speed = 15;
+
+
     private Vector2 _startPosition = new Vector2();
     private Vector2 endPosition;
-
+    public Vector2 currentVelocity;
     public Vector2 currentPosition;
+    public int currentFaceAngle;
+    public bool reachEnd = false;  // 到达了终点？
 
-    public int speed = 100;
 
-    public Vector2 GetAimPosition()
+    public Vector2 GetTargetPosition()
     {
         return endPosition;
         // return GameMainManager2.Instance.mousePosition;
+    }
+    
+    public void ReachEnd()
+    {
+        reachEnd = true;
+    }
+    
+    void UpdateForwardDirection()
+    {
+        // 方法1：使用当前面向角度
+        Vector3 forwardDirection = new Vector3(
+            Mathf.Cos(currentFaceAngle * Mathf.Deg2Rad),
+            0,
+            Mathf.Sin(currentFaceAngle * Mathf.Deg2Rad)
+        ).normalized;
+
+        // 更新物体的前向方向
+        transform.forward = forwardDirection;
     }
 
     // Update is called once per frame
@@ -38,33 +63,19 @@ public class GameAgent2 : MonoBehaviour
     {
         if (sid >= 0)
         {
-            Vector2 pos = Simulator.Instance.getAgentPosition(sid);
-            Vector2 vel = Simulator.Instance.getAgentVelocity(sid);
-            transform.position = new Vector3(pos.x(), transform.position.y, pos.y());
-            if (Math.Abs(vel.x()) > 0.0001f && Math.Abs(vel.y()) > 0.0001f)
-                transform.forward = new Vector3(vel.x(), 0, vel.y()).normalized;
-        }
-
-        if (!Input.GetMouseButton(1))
-        {
-            Simulator.Instance.setAgentPrefVelocity(sid, new Vector2(0, 0));
-            return;
+            transform.position = new Vector3(currentPosition.x(), transform.position.y, currentPosition.y());
+            // Vector2 vel = currentVelocity;
+            // if (Math.Abs(vel.x()) > 0.0001f && Math.Abs(vel.y()) > 0.0001f)
+            //     transform.forward = new Vector3(vel.x(), 0, vel.y()).normalized;
+            UpdateForwardDirection();
+            
+            if (Input.GetMouseButton(1))
+            {
+                // endPosition = GameMainManager2.Instance.mousePosition;
+                endPosition = -_startPosition;
+                reachEnd = false;
+            }
         }
         
-        // 测试 : 跟随鼠标 / 经过中间到达
-        Vector2 goalVector = GameMainManager2.Instance.mousePosition - Simulator.Instance.getAgentPosition(sid);
-        // Vector2 goalVector = endPosition - Simulator.Instance.getAgentPosition(sid);
-        
-        goalVector = RVOMath.normalize(goalVector) * speed;
-
-        Simulator.Instance.setAgentPrefVelocity(sid, goalVector);
-
-        /* Perturb a little to avoid deadlocks due to perfect symmetry. */
-        // float angle = (float) m_random.NextDouble()*2.0f*(float) Math.PI;
-        // float dist = (float) m_random.NextDouble()*0.0001f;
-        //
-        // Simulator.Instance.setAgentPrefVelocity(sid, Simulator.Instance.getAgentPrefVelocity(sid) +
-        //                                              dist*
-        //                                              new Vector2((float) Math.Cos(angle), (float) Math.Sin(angle)));
     }
 }

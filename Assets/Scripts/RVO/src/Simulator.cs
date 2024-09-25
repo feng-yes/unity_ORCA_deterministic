@@ -583,6 +583,11 @@ namespace RVO
         {
             return agents_[agentNo2indexDict_[agentNo]].prefVelocity_;
         }
+        
+        public Vector2 getAgentNewVelocity(int agentNo)
+        {
+            return agents_[agentNo2indexDict_[agentNo]].GetNewVelocity();
+        }
 
         /**
          * <summary>Returns the radius of a specified agent.</summary>
@@ -890,6 +895,11 @@ namespace RVO
         public void setAgentPrefVelocity(int agentNo, Vector2 prefVelocity)
         {
             agents_[agentNo2indexDict_[agentNo]].prefVelocity_ = prefVelocity;
+        }
+        
+        public void setAgentPrefPosition(int agentNo, Vector2 prefPosition)
+        {
+            agents_[agentNo2indexDict_[agentNo]].prefPosition_ = prefPosition;
         }
 
         /**

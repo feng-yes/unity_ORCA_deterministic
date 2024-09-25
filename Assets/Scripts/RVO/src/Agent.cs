@@ -47,8 +47,12 @@ namespace RVO
         internal IList<KeyValuePair<float, Obstacle>> obstacleNeighbors_ = new List<KeyValuePair<float, Obstacle>>();
         internal IList<Line> orcaLines_ = new List<Line>();
         internal Vector2 position_;
+        
         // 期望速度，是算法的优化目标，即无碰撞约束下的目标运动方向
         internal Vector2 prefVelocity_;
+        // 期望位置，可用于计算 prefVelocity_, 二者选其一
+        internal Vector2 prefPosition_;
+        
         // 实际速度，计算时会以这个作为 agent 的速度
         internal Vector2 velocity_;
         internal int id_ = 0;
@@ -68,6 +72,11 @@ namespace RVO
         // computeNewVelocity 计算出来的速度
         private Vector2 newVelocity_;
 
+        public Vector2 GetNewVelocity()
+        {
+            return newVelocity_;
+        }
+        
         /**
          * <summary>Computes the neighbors of this agent.</summary>
          */
