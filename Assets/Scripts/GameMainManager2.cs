@@ -12,7 +12,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
 
     private const float logicframe = 0.05f;
     private const float AngleThreshold = 1f;  // 小于多少度算转身完成
-    private const float stopDistanceThreshold = 0.5f;  // 小于多少距离算到达终点
+    private const float stopDistanceThreshold = 0.8f;  // 小于多少距离算到达终点
     private const float stopVelocityThreshold = 0.01f;  // 速度小于多少度算调整完成，不再移动
 
     [HideInInspector] public Vector2 mousePosition;
@@ -23,7 +23,8 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
     private float timeSinceLastStep = 0f;
 
     private bool startLogicFrame = false;
-    private float totalframe = 0f;
+    private float totalTime = 0f;
+    private int totalFrame = 0;
 
     // Use this for initialization
     void Start()
@@ -69,13 +70,15 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
             Assert.IsNotNull(ga);
             ga.sid = sid;
             ga.StartPosition = new Vector2(mousePosition.x(), mousePosition.y());
+            // ga.StartPosition = new Vector2();
             m_agentMap.Add(sid, ga);
         }
     }
 
     private void UpdateLogicFrame()
     {
-        totalframe = totalframe + logicframe;
+        totalTime = totalTime + logicframe;
+        totalFrame++;
         Simulator.Instance.doStepBefore();
 
         foreach (var vAgent in m_agentMap)
@@ -85,8 +88,14 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
             {
                 continue;
             }
+
+            if (totalFrame - agent.LastSimulatorFrame < GameAgent2.simulatorPeriod)
+            {
+                continue;
+            }
+
+            agent.LastSimulatorFrame = totalFrame;
             
-            // 移动
             Vector2 aimPosition = agent.GetTargetPosition();
             Vector2 goalVector = aimPosition - agent.currentPosition;
             if (RVOMath.absSq(goalVector) > stopDistanceThreshold)
@@ -102,26 +111,43 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
             Simulator.Instance.computeAgentNeighbors(agent.sid);
             Simulator.Instance.computeAgentNewVelocity(agent.sid);
             
+        }
+
+        foreach (var vAgent in m_agentMap)
+        {
+            GameAgent2 agent = vAgent.Value;
+            if (agent.reachEnd)
+            {
+                continue;
+            }
+            
+            // todo 这里应该缓存下上面的结果
+            Vector2 aimPosition = agent.GetTargetPosition();
+            Vector2 goalVector = aimPosition - agent.currentPosition;
+            if (RVOMath.absSq(goalVector) <= stopDistanceThreshold)
+            {
+                agent.ReachEnd();
+                continue;
+            }
+            
             // 处理转身及速度
             Vector2 newVelocity = Simulator.Instance.getAgentNewVelocity(agent.sid);
-            agent.currentVelocity = newVelocity;
-            ProcessMovementAndRotation(agent);
-
+            ProcessMovementAndRotation(agent, newVelocity);
+            
             // 替代原有的 agent update
             Simulator.Instance.setAgentVelocity(agent.sid, agent.currentVelocity);
             Simulator.Instance.setAgentPosition(agent.sid, agent.currentPosition);
-            
         }
 
         // 可以不设
-        Simulator.Instance.setGlobalTime(totalframe);
+        Simulator.Instance.setGlobalTime(totalTime);
     }
     
-    void ProcessMovementAndRotation(GameAgent2 agent)
+    void ProcessMovementAndRotation(GameAgent2 agent, Vector2 newVelocity)
     {
         float targetAngle = agent.currentFaceAngle;
         float angleDifference = 0;
-        Vector2 vel = agent.currentVelocity;
+        Vector2 vel = newVelocity;
         if (Math.Abs(vel.x()) > stopVelocityThreshold || Math.Abs(vel.y()) > stopVelocityThreshold)
         {
             targetAngle = Mathf.Atan2(vel.y(), vel.x()) * Mathf.Rad2Deg;
@@ -129,6 +155,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
         }
         else
         {
+            // 找不到合适的速度 或 已经接近了终点
             agent.ReachEnd();
         }
 
@@ -152,6 +179,9 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
                 timeRemainingRatio = 0f;
             }
         }
+        
+        agent.currentVelocity = newVelocity;
+        // agent.currentVelocity = newVelocity * timeRemainingRatio;
 
         // 根据剩余时间比例进行移动
         if (timeRemainingRatio > 0)

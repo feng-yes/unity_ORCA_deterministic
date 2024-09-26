@@ -967,6 +967,11 @@ namespace RVO
             agents_[agentNo2indexDict_[agentNo]].computeNewVelocity();
         }
 
+        public bool isAgentInCollision(int agentNo)
+        {
+            return agents_[agentNo2indexDict_[agentNo]].IsInCollision();
+        }
+
         /**
          * <summary>Sets the global time of the simulation.</summary>
          *

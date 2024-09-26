@@ -76,6 +76,36 @@ namespace RVO
         {
             return newVelocity_;
         }
+
+        // 是否碰撞了
+        public bool IsInCollision()
+        {
+            // todo obstacle
+            
+            foreach (var edge in Simulator.Instance.boundaryEdges)
+            {
+                Vector2 relativePosition = position_ - edge.point;
+                if (RVOMath.det(edge.direction, relativePosition) > RVOMath.COLLISION_THRESHOLD)
+                {
+                    return true;
+                }
+            }
+
+            for (int i = 0; i < agentNeighbors_.Count; ++i)
+            {
+                Agent other = agentNeighbors_[i].Value;
+                Vector2 relativePosition = other.position_ - position_;
+                float distSq = RVOMath.absSq(relativePosition);
+                float combinedRadius = radius_ + other.radius_;
+                float combinedRadiusSq = RVOMath.sqr(combinedRadius);
+                if (distSq + RVOMath.COLLISION_THRESHOLD <= combinedRadiusSq)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         
         /**
          * <summary>Computes the neighbors of this agent.</summary>

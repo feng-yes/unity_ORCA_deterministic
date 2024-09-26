@@ -43,6 +43,7 @@ namespace RVO
          * <summary>A sufficiently small positive number.</summary>
          */
         internal const float RVO_EPSILON = 0.00001f;
+        internal const float COLLISION_THRESHOLD = 0.1f;
 
         /**
          * <summary>Computes the length of a specified two-dimensional vector.
