@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using RVO;
+using SoftFloat;
 using UnityEngine;
 using Vector2 = RVO.Vector2;
 
@@ -20,10 +21,10 @@ public class ObstacleCollect : MonoBehaviour
                          boxColliders[i].size.z * boxColliders[i].transform.lossyScale.z * 0.5f;
 
             IList<Vector2> obstacle = new List<Vector2>();
-            obstacle.Add(new Vector2(maxX, maxZ));
-            obstacle.Add(new Vector2(minX, maxZ));
-            obstacle.Add(new Vector2(minX, minZ));
-            obstacle.Add(new Vector2(maxX, minZ));
+            obstacle.Add(new Vector2((sfloat)maxX, (sfloat)maxZ));
+            obstacle.Add(new Vector2((sfloat)minX, (sfloat)maxZ));
+            obstacle.Add(new Vector2((sfloat)minX, (sfloat)minZ));
+            obstacle.Add(new Vector2((sfloat)maxX, (sfloat)minZ));
             Simulator.Instance.addObstacle(obstacle);
         }
     }

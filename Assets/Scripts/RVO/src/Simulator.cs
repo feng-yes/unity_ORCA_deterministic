@@ -32,6 +32,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using SoftFloat;
 
 namespace RVO
 {
@@ -108,7 +109,7 @@ namespace RVO
         internal IList<Agent> agents_;
         internal IList<Obstacle> obstacles_;
         internal KdTree kdTree_;
-        internal float timeStep_;
+        internal sfloat timeStep_;
         
         internal List<Vector2> boundaryVertices;
         internal List<Line> boundaryEdges = new List<Line>();
@@ -126,7 +127,7 @@ namespace RVO
         private Worker[] workers_;
         private int numWorkers_;  // 工作线程数，值是 ThreadPool.GetMinThreads
         private int workerAgentCount_;
-        private float globalTime_;
+        private sfloat globalTime_;
 
         public static Simulator Instance
         {
@@ -248,7 +249,7 @@ namespace RVO
          * <param name="velocity">The initial two-dimensional linear velocity of
          * this agent.</param>
          */
-        public int addAgent(Vector2 position, float neighborDist, int maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, Vector2 velocity)
+        public int addAgent(Vector2 position, sfloat neighborDist, int maxNeighbors, sfloat timeHorizon, sfloat timeHorizonObst, sfloat radius, sfloat maxSpeed, Vector2 velocity)
         {
             Agent agent = new Agent();
             agent.id_ = s_totalID;
@@ -315,7 +316,7 @@ namespace RVO
                 else
                 {
                     // 如果下一个顶点在从前一个顶点到当前顶点的直线的左边或共线，则认为是凸的
-                    obstacle.convex_ = (RVOMath.leftOf(vertices[(i == 0 ? vertices.Count - 1 : i - 1)], vertices[i], vertices[(i == vertices.Count - 1 ? 0 : i + 1)]) >= 0.0f);
+                    obstacle.convex_ = (RVOMath.leftOf(vertices[(i == 0 ? vertices.Count - 1 : i - 1)], vertices[i], vertices[(i == vertices.Count - 1 ? 0 : i + 1)]) >= (sfloat)0);
                 }
 
                 obstacle.id_ = obstacles_.Count;
@@ -359,8 +360,8 @@ namespace RVO
             defaultAgent_ = null;
             kdTree_ = new KdTree();
             obstacles_ = new List<Obstacle>();
-            globalTime_ = 0.0f;
-            timeStep_ = 0.1f;
+            globalTime_ = sfloat.Zero;
+            timeStep_ = (sfloat)0.1f;
 
             SetNumWorkers(0);
         }
@@ -371,7 +372,7 @@ namespace RVO
          *
          * <returns>The global time after the simulation step.</returns>
          */
-        public float doStep()
+        public sfloat doStep()
         {
             // 删除代理
             updateDeleteAgent();
@@ -469,7 +470,7 @@ namespace RVO
          * <param name="agentNo">The number of the agent whose maximum speed is
          * to be retrieved.</param>
          */
-        public float getAgentMaxSpeed(int agentNo)
+        public sfloat getAgentMaxSpeed(int agentNo)
         {
             return agents_[agentNo2indexDict_[agentNo]].maxSpeed_;
         }
@@ -484,7 +485,7 @@ namespace RVO
          * <param name="agentNo">The number of the agent whose maximum neighbor
          * distance is to be retrieved.</param>
          */
-        public float getAgentNeighborDist(int agentNo)
+        public sfloat getAgentNeighborDist(int agentNo)
         {
             return agents_[agentNo2indexDict_[agentNo]].neighborDist_;
         }
@@ -597,7 +598,7 @@ namespace RVO
          * <param name="agentNo">The number of the agent whose radius is to be
          * retrieved.</param>
          */
-        public float getAgentRadius(int agentNo)
+        public sfloat getAgentRadius(int agentNo)
         {
             return agents_[agentNo2indexDict_[agentNo]].radius_;
         }
@@ -610,7 +611,7 @@ namespace RVO
          * <param name="agentNo">The number of the agent whose time horizon is
          * to be retrieved.</param>
          */
-        public float getAgentTimeHorizon(int agentNo)
+        public sfloat getAgentTimeHorizon(int agentNo)
         {
             return agents_[agentNo2indexDict_[agentNo]].timeHorizon_;
         }
@@ -625,7 +626,7 @@ namespace RVO
          * <param name="agentNo">The number of the agent whose time horizon with
          * respect to obstacles is to be retrieved.</param>
          */
-        public float getAgentTimeHorizonObst(int agentNo)
+        public sfloat getAgentTimeHorizonObst(int agentNo)
         {
             return agents_[agentNo2indexDict_[agentNo]].timeHorizonObst_;
         }
@@ -651,7 +652,7 @@ namespace RVO
          * <returns>The present global time of the simulation (zero initially).
          * </returns>
          */
-        public float getGlobalTime()
+        public sfloat getGlobalTime()
         {
             return globalTime_;
         }
@@ -737,7 +738,7 @@ namespace RVO
          *
          * <returns>The present time step of the simulation.</returns>
          */
-        public float getTimeStep()
+        public sfloat getTimeStep()
         {
             return timeStep_;
         }
@@ -768,12 +769,12 @@ namespace RVO
          * the two points and the obstacles in order for the points to be
          * mutually visible (optional). Must be non-negative.</param>
          */
-        public bool queryVisibility(Vector2 point1, Vector2 point2, float radius)
+        public bool queryVisibility(Vector2 point1, Vector2 point2, sfloat radius)
         {
             return kdTree_.queryVisibility(point1, point2, radius);
         }
 
-        public int queryNearAgent(Vector2 point, float radius)
+        public int queryNearAgent(Vector2 point, sfloat radius)
         {
             if (getNumAgents() == 0)
                 return -1;
@@ -812,7 +813,7 @@ namespace RVO
          * <param name="velocity">The default initial two-dimensional linear
          * velocity of a new agent.</param>
          */
-        public void setAgentDefaults(float neighborDist, int maxNeighbors, float timeHorizon, float timeHorizonObst, float radius, float maxSpeed, Vector2 velocity)
+        public void setAgentDefaults(sfloat neighborDist, int maxNeighbors, sfloat timeHorizon, sfloat timeHorizonObst, sfloat radius, sfloat maxSpeed, Vector2 velocity)
         {
             if (defaultAgent_ == null)
             {
@@ -850,7 +851,7 @@ namespace RVO
          * <param name="maxSpeed">The replacement maximum speed. Must be
          * non-negative.</param>
          */
-        public void setAgentMaxSpeed(int agentNo, float maxSpeed)
+        public void setAgentMaxSpeed(int agentNo, sfloat maxSpeed)
         {
             agents_[agentNo2indexDict_[agentNo]].maxSpeed_ = maxSpeed;
         }
@@ -864,7 +865,7 @@ namespace RVO
          * <param name="neighborDist">The replacement maximum neighbor distance.
          * Must be non-negative.</param>
          */
-        public void setAgentNeighborDist(int agentNo, float neighborDist)
+        public void setAgentNeighborDist(int agentNo, sfloat neighborDist)
         {
             agents_[agentNo2indexDict_[agentNo]].neighborDist_ = neighborDist;
         }
@@ -910,7 +911,7 @@ namespace RVO
          * <param name="radius">The replacement radius. Must be non-negative.
          * </param>
          */
-        public void setAgentRadius(int agentNo, float radius)
+        public void setAgentRadius(int agentNo, sfloat radius)
         {
             agents_[agentNo2indexDict_[agentNo]].radius_ = radius;
         }
@@ -924,7 +925,7 @@ namespace RVO
          * <param name="timeHorizon">The replacement time horizon with respect
          * to other agents. Must be positive.</param>
          */
-        public void setAgentTimeHorizon(int agentNo, float timeHorizon)
+        public void setAgentTimeHorizon(int agentNo, sfloat timeHorizon)
         {
             agents_[agentNo2indexDict_[agentNo]].timeHorizon_ = timeHorizon;
         }
@@ -938,7 +939,7 @@ namespace RVO
          * <param name="timeHorizonObst">The replacement time horizon with
          * respect to obstacles. Must be positive.</param>
          */
-        public void setAgentTimeHorizonObst(int agentNo, float timeHorizonObst)
+        public void setAgentTimeHorizonObst(int agentNo, sfloat timeHorizonObst)
         {
             agents_[agentNo2indexDict_[agentNo]].timeHorizonObst_ = timeHorizonObst;
         }
@@ -977,7 +978,7 @@ namespace RVO
          *
          * <param name="globalTime">The global time of the simulation.</param>
          */
-        public void setGlobalTime(float globalTime)
+        public void setGlobalTime(sfloat globalTime)
         {
             globalTime_ = globalTime;
         }
@@ -1008,7 +1009,7 @@ namespace RVO
          * <param name="timeStep">The time step of the simulation. Must be
          * positive.</param>
          */
-        public void setTimeStep(float timeStep)
+        public void setTimeStep(sfloat timeStep)
         {
             timeStep_ = timeStep;
         }

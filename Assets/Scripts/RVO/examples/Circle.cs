@@ -40,6 +40,7 @@
 
 using System;
 using System.Collections.Generic;
+using SoftFloat;
 
 namespace RVO
 {
@@ -56,13 +57,13 @@ namespace RVO
         void setupScenario()
         {
             /* Specify the global time step of the simulation. */
-            Simulator.Instance.setTimeStep(0.25f);
+            Simulator.Instance.setTimeStep((sfloat)0.25f);
 
             /*
              * Specify the default parameters for agents that are subsequently
              * added.
              */
-            Simulator.Instance.setAgentDefaults(15.0f, 10, 10.0f, 10.0f, 1.5f, 2.0f, new Vector2(0.0f, 0.0f));
+            Simulator.Instance.setAgentDefaults((sfloat)15.0f, 10, (sfloat)10.0f, (sfloat)10.0f, (sfloat)1.5f, (sfloat)2.0f, new Vector2((sfloat)0.0f, (sfloat)0.0f));
 
             /*
              * Add agents, specifying their start position, and store their
@@ -70,9 +71,9 @@ namespace RVO
              */
             for (int i = 0; i < 250; ++i)
             {
-                Simulator.Instance.addAgent(200.0f *
-                    new Vector2((float)Math.Cos(i * 2.0f * Math.PI / 250.0f),
-                        (float)Math.Sin(i * 2.0f * Math.PI / 250.0f)));
+                Simulator.Instance.addAgent((sfloat)200.0f *
+                                            new Vector2((sfloat)Math.Cos(i * 2.0f * Math.PI / 250.0f),
+                                                (sfloat)Math.Sin(i * 2.0f * Math.PI / 250.0f)));
                 goals.Add(-Simulator.Instance.getAgentPosition(i));
             }
         }
@@ -103,7 +104,7 @@ namespace RVO
             {
                 Vector2 goalVector = goals[i] - Simulator.Instance.getAgentPosition(i);
 
-                if (RVOMath.absSq(goalVector) > 1.0f)
+                if (RVOMath.absSq(goalVector) > (sfloat)1.0f)
                 {
                     goalVector = RVOMath.normalize(goalVector);
                 }

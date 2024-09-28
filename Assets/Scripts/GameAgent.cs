@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using RVO;
+using SoftFloat;
 using UnityEngine;
 using Random = System.Random;
 using Vector2 = RVO.Vector2;
@@ -36,14 +37,14 @@ public class GameAgent : MonoBehaviour
         {
             Vector2 pos = Simulator.Instance.getAgentPosition(sid);
             Vector2 vel = Simulator.Instance.getAgentVelocity(sid);
-            transform.position = new Vector3(pos.x(), transform.position.y, pos.y());
-            if (Math.Abs(vel.x()) > 0.0001f && Math.Abs(vel.y()) > 0.0001f)
-                transform.forward = new Vector3(vel.x(), 0, vel.y()).normalized;
+            transform.position = new Vector3((float)pos.x(), transform.position.y, (float)pos.y());
+            if (Math.Abs((float)vel.x()) > 0.0001f && Math.Abs((float)vel.y()) > 0.0001f)
+                transform.forward = new Vector3((float)vel.x(), 0, (float)vel.y()).normalized;
         }
 
         if (!Input.GetMouseButton(1))
         {
-            Simulator.Instance.setAgentPrefVelocity(sid, new Vector2(0, 0));
+            Simulator.Instance.setAgentPrefVelocity(sid, new Vector2(sfloat.Zero, sfloat.Zero));
             return;
         }
 
@@ -53,7 +54,7 @@ public class GameAgent : MonoBehaviour
         // 测试经过中间到达
         // Vector2 goalVector = endPosition - Simulator.Instance.getAgentPosition(sid);
         
-        if (RVOMath.absSq(goalVector) > 1.0f)
+        if (RVOMath.absSq(goalVector) > sfloat.One)
         {
             goalVector = RVOMath.normalize(goalVector);
         }

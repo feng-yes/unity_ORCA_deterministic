@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Lean;
 using RVO;
+using SoftFloat;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vector2 = RVO.Vector2;
@@ -10,27 +11,27 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
 {
     public GameObject agentPrefab;
 
-    private const float logicframe = 0.05f;
-    private const float AngleThreshold = 1f;  // 小于多少度算转身完成
-    private const float stopDistanceThreshold = 0.8f;  // 小于多少距离算到达终点
-    private const float stopVelocityThreshold = 0.01f;  // 速度小于多少度算调整完成，不再移动
+    private static readonly sfloat logicframe = (sfloat)0.05f;
+    private static readonly sfloat AngleThreshold = (sfloat)1f;  // 小于多少度算转身完成
+    private static readonly sfloat stopDistanceThreshold = (sfloat)0.8f;  // 小于多少距离算到达终点
+    private static readonly sfloat stopVelocityThreshold = (sfloat)0.01f;  // 速度小于多少度算调整完成，不再移动
 
     [HideInInspector] public Vector2 mousePosition;
 
     private Plane m_hPlane = new Plane(Vector3.up, Vector3.zero);
     
     private Dictionary<int, GameAgent2> m_agentMap = new Dictionary<int, GameAgent2>();
-    private float timeSinceLastStep = 0f;
+    private sfloat timeSinceLastStep = sfloat.Zero;
 
     private bool startLogicFrame = false;
-    private float totalTime = 0f;
+    private sfloat totalTime = sfloat.Zero;
     private int totalFrame = 0;
 
     // Use this for initialization
     void Start()
     {
         Simulator.Instance.setTimeStep(logicframe);
-        Simulator.Instance.setAgentDefaults(15.0f, 10, 0.2f, 0.2f, 2.0f, GameAgent2.speed, new Vector2(0.0f, 0.0f));
+        Simulator.Instance.setAgentDefaults((sfloat)15.0f, 10, (sfloat)0.2f, (sfloat)0.2f, (sfloat)2.0f, (sfloat)GameAgent2.speed, new Vector2(sfloat.Zero, sfloat.Zero));
 
         // 边界在 BoundaryPoint 加了 
         Simulator.Instance.processObstacles();
@@ -44,14 +45,14 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
         if (m_hPlane.Raycast(mouseRay, out rayDistance))
             position = mouseRay.GetPoint(rayDistance);
 
-        mousePosition.x_ = position.x;
-        mousePosition.y_ = position.z;
+        mousePosition.x_ = (sfloat)position.x;
+        mousePosition.y_ = (sfloat)position.z;
     }
 
     void DeleteAgent()
     {
         float rangeSq = float.MaxValue;
-        int agentNo = Simulator.Instance.queryNearAgent(mousePosition, 1.5f);
+        int agentNo = Simulator.Instance.queryNearAgent(mousePosition, (sfloat)1.5f);
         if (agentNo == -1 || !m_agentMap.ContainsKey(agentNo))
             return;
 
@@ -65,7 +66,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
         int sid = Simulator.Instance.addAgent(mousePosition);
         if (sid >= 0)
         {
-            GameObject go = LeanPool.Spawn(agentPrefab, new Vector3(mousePosition.x(), 0, mousePosition.y()), Quaternion.identity);
+            GameObject go = LeanPool.Spawn(agentPrefab, new Vector3((float)mousePosition.x(), 0, (float)mousePosition.y()), Quaternion.identity);
             GameAgent2 ga = go.GetComponent<GameAgent2>();
             Assert.IsNotNull(ga);
             ga.sid = sid;
@@ -100,11 +101,11 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
             Vector2 goalVector = aimPosition - agent.currentPosition;
             if (RVOMath.absSq(goalVector) > stopDistanceThreshold)
             {
-                goalVector = RVOMath.normalize(goalVector) * GameAgent2.speed;
+                goalVector = RVOMath.normalize(goalVector) * (sfloat)GameAgent2.speed;
             }
             else
             {
-                goalVector = new Vector2(0, 0);
+                goalVector = new Vector2(sfloat.Zero, sfloat.Zero);
             }
             Simulator.Instance.setAgentPrefVelocity(agent.sid, goalVector);
             
@@ -145,13 +146,13 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
     
     void ProcessMovementAndRotation(GameAgent2 agent, Vector2 newVelocity)
     {
-        float targetAngle = agent.currentFaceAngle;
-        float angleDifference = 0;
+        sfloat targetAngle = (sfloat)agent.currentFaceAngle;
+        sfloat angleDifference = sfloat.Zero;
         Vector2 vel = newVelocity;
-        if (Math.Abs(vel.x()) > stopVelocityThreshold || Math.Abs(vel.y()) > stopVelocityThreshold)
+        if (sfloat.Abs(vel.x()) > stopVelocityThreshold || sfloat.Abs(vel.y()) > stopVelocityThreshold)
         {
-            targetAngle = Mathf.Atan2(vel.y(), vel.x()) * Mathf.Rad2Deg;
-            angleDifference = Mathf.DeltaAngle(agent.currentFaceAngle, targetAngle);
+            targetAngle = libm.atan2f(vel.y(), vel.x()) * (sfloat)Mathf.Rad2Deg;
+            angleDifference = (sfloat)Mathf.DeltaAngle(agent.currentFaceAngle, (float)targetAngle);
         }
         else
         {
@@ -159,24 +160,24 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
             agent.ReachEnd();
         }
 
-        float timeRemainingRatio = 1f;
+        sfloat timeRemainingRatio = sfloat.One;
 
         // 如果需要转向
-        if (Mathf.Abs(angleDifference) > AngleThreshold)
+        if (sfloat.Abs(angleDifference) > AngleThreshold)
         {
             // 计算这一帧需要的转向量
-            float turnAmount = Mathf.Sign(angleDifference) * Mathf.Min(Mathf.Abs(angleDifference), GameAgent2.faceAngleTurnPerFrame);
+            sfloat turnAmount = (sfloat)angleDifference.Sign() * sfloat.Min(sfloat.Abs(angleDifference), (sfloat)GameAgent2.faceAngleTurnPerFrame);
             
             // 计算实际转向所用的时间比例
-            timeRemainingRatio = 1f - (Mathf.Abs(turnAmount) / GameAgent2.faceAngleTurnPerFrame);
+            timeRemainingRatio = sfloat.One - (sfloat.Abs(turnAmount) / (sfloat)GameAgent2.faceAngleTurnPerFrame);
 
             // 更新当前朝向
-            agent.currentFaceAngle = (int)Mathf.Repeat(agent.currentFaceAngle + turnAmount, 360f);
+            agent.currentFaceAngle = (int)Mathf.Repeat(agent.currentFaceAngle + (float)turnAmount, 360f);
 
             // 如果转向未完成，则不进行移动
-            if (Mathf.Abs(Mathf.DeltaAngle(agent.currentFaceAngle, targetAngle)) > AngleThreshold)
+            if (Mathf.Abs(Mathf.DeltaAngle(agent.currentFaceAngle, (float)targetAngle)) > (float)AngleThreshold)
             {
-                timeRemainingRatio = 0f;
+                timeRemainingRatio = sfloat.Zero;
             }
         }
         
@@ -184,7 +185,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
         // agent.currentVelocity = newVelocity * timeRemainingRatio;
 
         // 根据剩余时间比例进行移动
-        if (timeRemainingRatio > 0)
+        if (timeRemainingRatio > sfloat.Zero)
         {
             agent.currentPosition += agent.currentVelocity * timeRemainingRatio * logicframe;
         }
@@ -218,7 +219,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
 
         // Simulator.Instance.doStep();
         // Accumulate the time that has passed since the last frame
-        timeSinceLastStep += Time.deltaTime;
+        timeSinceLastStep += (sfloat)Time.deltaTime;
     
         // Check if enough time has passed to execute a simulation step
         if (timeSinceLastStep >= logicframe)

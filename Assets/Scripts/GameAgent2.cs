@@ -71,7 +71,7 @@ public class GameAgent2 : MonoBehaviour
     {
         if (sid >= 0)
         {
-            transform.position = new Vector3(currentPosition.x(), transform.position.y, currentPosition.y());
+            transform.position = new Vector3((float)currentPosition.x(), transform.position.y, (float)currentPosition.y());
             // Vector2 vel = currentVelocity;
             // if (Math.Abs(vel.x()) > 0.0001f && Math.Abs(vel.y()) > 0.0001f)
             //     transform.forward = new Vector3(vel.x(), 0, vel.y()).normalized;

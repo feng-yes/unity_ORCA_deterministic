@@ -42,6 +42,7 @@
 
 using System;
 using System.Collections.Generic;
+using SoftFloat;
 
 namespace RVO
 {
@@ -67,13 +68,13 @@ namespace RVO
         void setupScenario()
         {
             /* Specify the global time step of the simulation. */
-            Simulator.Instance.setTimeStep(0.25f);
+            Simulator.Instance.setTimeStep((sfloat)0.25f);
 
             /*
              * Specify the default parameters for agents that are subsequently
              * added.
              */
-            Simulator.Instance.setAgentDefaults(15.0f, 10, 5.0f, 5.0f, 2.0f, 2.0f, new Vector2(0.0f, 0.0f));
+            Simulator.Instance.setAgentDefaults((sfloat)15.0f, 10, (sfloat)5.0f, (sfloat)5.0f, (sfloat)2.0f, (sfloat)2.0f, new Vector2(sfloat.Zero, sfloat.Zero));
 
             /*
              * Add agents, specifying their start position, and store their
@@ -83,17 +84,17 @@ namespace RVO
             {
                 for (int j = 0; j < 5; ++j)
                 {
-                    Simulator.Instance.addAgent(new Vector2(55.0f + i * 10.0f, 55.0f + j * 10.0f));
-                    goals.Add(new Vector2(-75.0f, -75.0f));
+                    Simulator.Instance.addAgent(new Vector2((sfloat)55.0f + (sfloat)i * (sfloat)10.0f, (sfloat)55.0f + (sfloat)j * (sfloat)10.0f));
+                    goals.Add(new Vector2(-(sfloat)75.0f, -(sfloat)75.0f));
 
-                    Simulator.Instance.addAgent(new Vector2(-55.0f - i * 10.0f, 55.0f + j * 10.0f));
-                    goals.Add(new Vector2(75.0f, -75.0f));
+                    Simulator.Instance.addAgent(new Vector2(-(sfloat)55.0f - (sfloat)i * (sfloat)10.0f, (sfloat)55.0f + (sfloat)j * (sfloat)10.0f));
+                    goals.Add(new Vector2((sfloat)75.0f, -(sfloat)75.0f));
 
-                    Simulator.Instance.addAgent(new Vector2(55.0f + i * 10.0f, -55.0f - j * 10.0f));
-                    goals.Add(new Vector2(-75.0f, 75.0f));
+                    Simulator.Instance.addAgent(new Vector2((sfloat)55.0f + (sfloat)i * (sfloat)10.0f, -(sfloat)55.0f - (sfloat)j * (sfloat)10.0f));
+                    goals.Add(new Vector2(-(sfloat)75.0f, (sfloat)75.0f));
 
-                    Simulator.Instance.addAgent(new Vector2(-55.0f - i * 10.0f, -55.0f - j * 10.0f));
-                    goals.Add(new Vector2(75.0f, 75.0f));
+                    Simulator.Instance.addAgent(new Vector2(-(sfloat)55.0f - (sfloat)i * (sfloat)10.0f, -(sfloat)55.0f - (sfloat)j * (sfloat)10.0f));
+                    goals.Add(new Vector2((sfloat)75.0f, (sfloat)75.0f));
                 }
             }
 
@@ -102,31 +103,31 @@ namespace RVO
              * counterclockwise order.
              */
             IList<Vector2> obstacle1 = new List<Vector2>();
-            obstacle1.Add(new Vector2(-10.0f, 40.0f));
-            obstacle1.Add(new Vector2(-40.0f, 40.0f));
-            obstacle1.Add(new Vector2(-40.0f, 10.0f));
-            obstacle1.Add(new Vector2(-10.0f, 10.0f));
+            obstacle1.Add(new Vector2(-(sfloat)10.0f, (sfloat)40.0f));
+            obstacle1.Add(new Vector2(-(sfloat)40.0f, (sfloat)40.0f));
+            obstacle1.Add(new Vector2(-(sfloat)40.0f, (sfloat)10.0f));
+            obstacle1.Add(new Vector2(-(sfloat)10.0f, (sfloat)10.0f));
             Simulator.Instance.addObstacle(obstacle1);
 
             IList<Vector2> obstacle2 = new List<Vector2>();
-            obstacle2.Add(new Vector2(10.0f, 40.0f));
-            obstacle2.Add(new Vector2(10.0f, 10.0f));
-            obstacle2.Add(new Vector2(40.0f, 10.0f));
-            obstacle2.Add(new Vector2(40.0f, 40.0f));
+            obstacle2.Add(new Vector2((sfloat)10.0f, (sfloat)40.0f));
+            obstacle2.Add(new Vector2((sfloat)10.0f, (sfloat)10.0f));
+            obstacle2.Add(new Vector2((sfloat)40.0f, (sfloat)10.0f));
+            obstacle2.Add(new Vector2((sfloat)40.0f, (sfloat)40.0f));
             Simulator.Instance.addObstacle(obstacle2);
 
             IList<Vector2> obstacle3 = new List<Vector2>();
-            obstacle3.Add(new Vector2(10.0f, -40.0f));
-            obstacle3.Add(new Vector2(40.0f, -40.0f));
-            obstacle3.Add(new Vector2(40.0f, -10.0f));
-            obstacle3.Add(new Vector2(10.0f, -10.0f));
+            obstacle3.Add(new Vector2((sfloat)10.0f, -(sfloat)40.0f));
+            obstacle3.Add(new Vector2((sfloat)40.0f, -(sfloat)40.0f));
+            obstacle3.Add(new Vector2((sfloat)40.0f, -(sfloat)10.0f));
+            obstacle3.Add(new Vector2((sfloat)10.0f, -(sfloat)10.0f));
             Simulator.Instance.addObstacle(obstacle3);
 
             IList<Vector2> obstacle4 = new List<Vector2>();
-            obstacle4.Add(new Vector2(-10.0f, -40.0f));
-            obstacle4.Add(new Vector2(-10.0f, -10.0f));
-            obstacle4.Add(new Vector2(-40.0f, -10.0f));
-            obstacle4.Add(new Vector2(-40.0f, -40.0f));
+            obstacle4.Add(new Vector2(-(sfloat)10.0f, -(sfloat)40.0f));
+            obstacle4.Add(new Vector2(-(sfloat)10.0f, -(sfloat)10.0f));
+            obstacle4.Add(new Vector2(-(sfloat)40.0f, -(sfloat)10.0f));
+            obstacle4.Add(new Vector2(-(sfloat)40.0f, -(sfloat)40.0f));
             Simulator.Instance.addObstacle(obstacle4);
 
             /*
@@ -162,7 +163,7 @@ namespace RVO
             {
                 Vector2 goalVector = goals[i] - Simulator.Instance.getAgentPosition(i);
 
-                if (RVOMath.absSq(goalVector) > 1.0f)
+                if (RVOMath.absSq(goalVector) > (sfloat)1.0f)
                 {
                     goalVector = RVOMath.normalize(goalVector);
                 }
@@ -171,10 +172,10 @@ namespace RVO
 
                 /* Perturb a little to avoid deadlocks due to perfect symmetry. */
                 float angle = (float)random.NextDouble() * 2.0f * (float)Math.PI;
-                float dist = (float)random.NextDouble() * 0.0001f;
+                sfloat dist = (sfloat)random.NextDouble() * (sfloat)0.0001f;
 
                 Simulator.Instance.setAgentPrefVelocity(i, Simulator.Instance.getAgentPrefVelocity(i) +
-                    dist * new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)));
+                    dist * new Vector2((sfloat)Math.Cos(angle), (sfloat)Math.Sin(angle)));
             }
         }
 
@@ -183,7 +184,7 @@ namespace RVO
             /* Check if all agents have reached their goals. */
             for (int i = 0; i < Simulator.Instance.getNumAgents(); ++i)
             {
-                if (RVOMath.absSq(Simulator.Instance.getAgentPosition(i) - goals[i]) > 400.0f)
+                if (RVOMath.absSq(Simulator.Instance.getAgentPosition(i) - goals[i]) > (sfloat)400.0f)
                 {
                     return false;
                 }

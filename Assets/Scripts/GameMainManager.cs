@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Lean;
 using RVO;
+using SoftFloat;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vector2 = RVO.Vector2;
@@ -19,8 +20,8 @@ public class GameMainManager : SingletonBehaviour<GameMainManager>
     void Start()
     {
         Debug.Log("GameMainManager start");
-        Simulator.Instance.setTimeStep(0.25f);
-        Simulator.Instance.setAgentDefaults(15.0f, 10, 5.0f, 5.0f, 2.0f, 2.0f, new Vector2(0.0f, 0.0f));
+        Simulator.Instance.setTimeStep((sfloat)0.25f);
+        Simulator.Instance.setAgentDefaults((sfloat)15.0f, 10, (sfloat)5.0f, (sfloat)5.0f, (sfloat)2.0f, (sfloat)2.0f, new Vector2(sfloat.Zero, sfloat.Zero));
 
         // add in awake
         Simulator.Instance.processObstacles();
@@ -34,14 +35,14 @@ public class GameMainManager : SingletonBehaviour<GameMainManager>
         if (m_hPlane.Raycast(mouseRay, out rayDistance))
             position = mouseRay.GetPoint(rayDistance);
 
-        mousePosition.x_ = position.x;
-        mousePosition.y_ = position.z;
+        mousePosition.x_ = (sfloat)position.x;
+        mousePosition.y_ = (sfloat)position.z;
     }
 
     void DeleteAgent()
     {
         float rangeSq = float.MaxValue;
-        int agentNo = Simulator.Instance.queryNearAgent(mousePosition, 1.5f);
+        int agentNo = Simulator.Instance.queryNearAgent(mousePosition, (sfloat)1.5f);
         if (agentNo == -1 || !m_agentMap.ContainsKey(agentNo))
             return;
 
@@ -55,7 +56,7 @@ public class GameMainManager : SingletonBehaviour<GameMainManager>
         int sid = Simulator.Instance.addAgent(mousePosition);
         if (sid >= 0)
         {
-            GameObject go = LeanPool.Spawn(agentPrefab, new Vector3(mousePosition.x(), 0, mousePosition.y()), Quaternion.identity);
+            GameObject go = LeanPool.Spawn(agentPrefab, new Vector3((float)mousePosition.x(), 0, (float)mousePosition.y()), Quaternion.identity);
             GameAgent ga = go.GetComponent<GameAgent>();
             Assert.IsNotNull(ga);
             ga.sid = sid;
