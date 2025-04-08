@@ -79,8 +79,10 @@ public class GameAgent2 : MonoBehaviour
             
             if (Input.GetMouseButton(1))
             {
-                // endPosition = GameMainManager2.Instance.mousePosition;
-                endPosition = -_startPosition;
+                // 测试跟随鼠标
+                endPosition = GameMainManager2.Instance.mousePosition;
+                // 测试相向而行
+                // endPosition = -_startPosition;
                 reachEnd = false;
 
                 // Debug.Log(sid + ", " + Simulator.Instance.isAgentInCollision(sid));

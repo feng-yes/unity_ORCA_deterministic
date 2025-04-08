@@ -98,6 +98,7 @@ public class GameMainManager2 : SingletonBehaviour<GameMainManager2>
             agent.LastSimulatorFrame = totalFrame;
             
             Vector2 aimPosition = agent.GetTargetPosition();
+            // 目标速度向量
             Vector2 goalVector = aimPosition - agent.currentPosition;
             if (RVOMath.absSq(goalVector) > stopDistanceThreshold)
             {

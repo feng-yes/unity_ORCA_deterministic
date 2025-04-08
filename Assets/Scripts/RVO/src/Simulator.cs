@@ -326,6 +326,7 @@ namespace RVO
             return obstacleNo;
         }
         
+        // vertices 的点按顺时针排列
         public void setBoundary(IList<Vector2> vertices)
         {
             if (vertices.Count < 3)

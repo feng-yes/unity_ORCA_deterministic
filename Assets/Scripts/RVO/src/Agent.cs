@@ -407,7 +407,7 @@ namespace RVO
                     // 否则，创建一个 ORCA 线来避免穿过边界
                     sfloat invTimeStep = sfloat.One / Simulator.Instance.timeStep_;
                     line.direction = -edge.direction;
-                    line.point = invTimeStep * (edge.point + line.direction * radius_);
+                    line.point = invTimeStep * (-relativePosition + line.direction * radius_);
                     
                     // Vector2 u = velocity_ - (edge.point + edge.direction * (-relativePosition * edge.direction));
                     // line.point = velocity_ - u;
